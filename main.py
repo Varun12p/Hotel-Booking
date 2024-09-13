@@ -1,11 +1,8 @@
-from operator import index
-
 import pandas
-from numpy.ma.core import squeeze
-from pandas.core.interchange.from_dataframe import primitive_column_to_ndarray
+
 
 df = pandas.read_csv("hotels.csv", dtype={"id": str})
-
+df_cards = pandas.read_csv("cards.csv", dtype=str).to_dict(orient="records")
 print(df)
 
 class Hotel():
@@ -39,15 +36,29 @@ class ReservationTicket():
             """
         return content
 
+class CreditCard:
+    def __init__(self, number):
+        self.number = number
+
+    def validate(self, expiration, holder, cvc):
+        card_data = {"number": self.number, "expiration":expiration,"holder":holder,"cvc":cvc}
+        if card_data in df_cards:
+            return True
+        else:
+            return False
+
 
 HOTEL_ID = input("Enter the hotel id:")
 hotel = Hotel(HOTEL_ID)
-customer_name = input("Enter your name:")
-
 
 if hotel.available():
-    hotel.book()
-    reservation = ReservationTicket(customer_name,hotel)
-    print(reservation.reservation())
+    creditcard = CreditCard(number="1234567890123456")
+    if creditcard.validate("12/26","JOHN SMITH", "123"):
+        hotel.book()
+        customer_name = input("Enter your name:")
+        reservation = ReservationTicket(customer_name,hotel)
+        print(reservation.reservation())
+    else:
+        print("There is a problem with payment.")
 else:
     print("Hotel not available")
